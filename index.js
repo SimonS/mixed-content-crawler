@@ -1,10 +1,9 @@
-/* global document */
+const processPage = require('./lib/processPage');
 
 const puppeteer = require('puppeteer');
 const parseArgs = require('minimist');
 
 const argv = parseArgs(process.argv.slice(2));
-
 if (!argv._.length) {
   console.log('Usage: node index.js <baseUrl>');
   process.exit(1);
@@ -13,34 +12,12 @@ if (!argv._.length) {
 const baseUrl = argv._.pop();
 
 puppeteer.launch().then(async browser => {
-  const requests = [];
+  // need to work out how best to parallelise this (multiple pages? browsers? node processes?)
+  // in the meantime, just keep it simple, we can batch this stuff.
   const page = await browser.newPage();
-  await page.setRequestInterception(true);
+  const pageObject = await processPage(baseUrl, baseUrl, page);
 
-  page.on('request', interceptedRequest => {
-    requests.push(interceptedRequest);
-    interceptedRequest.continue();
-  });
-
-  await page.goto(baseUrl);
-
-  const httpRequests = requests.filter(request => request.url().match(/^http:\/\//));
-  console.log(httpRequests);
-
-  const isSubPage = url => url.match(new RegExp(`^${baseUrl}`));
-
-  const links = await page.evaluate(() =>
-    Array.from(document.querySelectorAll('a')).map(url => url.href),
-  );
-
-  const uniqueLinks = new Set(
-    links
-      .filter(isSubPage)
-      .map(url => url.replace(/\/$/, ''))
-      .map(url => url.split('#')[0]),
-  );
-
-  console.log(uniqueLinks);
+  console.log(pageObject);
 
   await browser.close();
 });
