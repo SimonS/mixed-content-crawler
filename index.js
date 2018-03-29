@@ -15,9 +15,7 @@ puppeteer.launch().then(async browser => {
   // need to work out how best to parallelise this (multiple pages? browsers? node processes?)
   // in the meantime, just keep it simple, we can batch this stuff.
   const page = await browser.newPage();
-  const pageObject = await processPage(baseUrl, baseUrl, page);
-
-  console.log(pageObject);
+  await processPage(baseUrl, baseUrl, page, true);
 
   await browser.close();
 });
