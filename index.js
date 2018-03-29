@@ -14,8 +14,17 @@ const baseUrl = argv._.pop();
 puppeteer.launch().then(async browser => {
   // need to work out how best to parallelise this (multiple pages? browsers? node processes?)
   // in the meantime, just keep it simple, we can batch this stuff.
-  const page = await browser.newPage();
-  await processPage(baseUrl, baseUrl, page, true);
+  const crawled = new Set();
+  let toCrawl = new Set([baseUrl]);
 
+  const difference = (a, b) => new Set([...a].filter(x => !b.has(x)));
+  const union = (a, b) => new Set([...a, ...b]);
+
+  while (toCrawl.size) {
+    const url = toCrawl.values().next().value;
+    const pageObject = await processPage(url, baseUrl, browser, true);
+    crawled.add(url);
+    toCrawl = union(difference(pageObject.uniqueLinks, crawled), toCrawl);
+  }
   await browser.close();
 });

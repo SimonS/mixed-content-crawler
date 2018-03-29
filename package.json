@@ -17,8 +17,11 @@
     "prettier": "^1.11.1"
   },
   "dependencies": {
+    "chalk": "^2.3.2",
     "minimist": "^1.2.0",
-    "puppeteer": "^1.2.0"
+    "ora": "^2.0.0",
+    "puppeteer": "^1.2.0",
+    "terminal-kit": "^1.15.1"
   },
   "prettier": {
     "printWidth": 100,
