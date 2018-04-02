@@ -25,8 +25,10 @@ puppeteer.launch().then(async browser => {
 
   while (toCrawl.size) {
     const url = toCrawl.values().next().value;
-    const pageObject = await processPage(url, baseUrl, browser, true);
     crawled.add(url);
+    toCrawl.delete(url);
+
+    const pageObject = await processPage(url, baseUrl, browser, true);
     toCrawl = union(difference(pageObject.uniqueLinks, crawled), toCrawl);
   }
   await browser.close();
